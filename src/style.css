@@ -1,0 +1,30 @@
+body {
+    background: #DEEED6;
+    color: #30346D;
+    margin-left: 20%;
+    margin-top: 4%;
+    font-size: 32pt;
+    font-family: Helvetica;
+}
+
+div {
+    margin: 10pt;
+}
+
+input, button {
+    font-size: 32pt;
+    padding: 10pt 15pt 10pt 15pt;
+    background: #30346D;
+    color: #DEEED6;
+    border: none;
+    border-radius: 10pt;
+    margin-right: 10pt;
+}
+
+button:disabled {
+    background: #757161;
+}
+
+textarea:focus, input:focus, button:focus {
+    outline: none;
+}
