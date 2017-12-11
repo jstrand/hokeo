@@ -17,8 +17,8 @@ init =
   , loser = ""
   }
 
-main =
-  Html.beginnerProgram { model = init, view = view, update = update }
+subscriptions : Model -> Sub Msg
+subscriptions model = Sub.none
 
 type Msg =
       TypeWinner String
@@ -28,15 +28,16 @@ type Msg =
 update msg model =
   case msg of
     TypeWinner player ->
-        { model | winner = player}
+        ({ model | winner = player}, Cmd.none)
     TypeLoser player ->
-        { model | loser = player }
+        ({ model | loser = player }, Cmd.none)
     Add ->
-        { model
+        ({ model
         | winner = ""
         , loser = ""
         , games = model.games ++ [{winner = model.winner, loser = model.loser}]
         }
+        , Cmd.none)
 
 viewGame game = li [] [text <| toString game]
 
@@ -56,3 +57,8 @@ view model =
     , h2 [] [text "Bordshockeystege"]
     , viewLadder <| createLadder model.games
     ]
+
+
+main : Program Never Model Msg
+main =
+  Html.program { init = (init, Cmd.none), view = view, update = update, subscriptions = subscriptions }
