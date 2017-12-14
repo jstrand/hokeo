@@ -4,6 +4,9 @@ import Html.Attributes exposing (disabled, value)
 
 import Ladder exposing (..)
 
+import Persistence exposing (saveGames)
+import Http
+
 type alias Model =
   { games : List Game
   , winner : String
@@ -24,7 +27,9 @@ type Msg =
       TypeWinner String
     | TypeLoser String
     | Add
+    | Save (Result Http.Error String)
 
+update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
     TypeWinner player ->
@@ -37,7 +42,8 @@ update msg model =
         , loser = ""
         , games = model.games ++ [{winner = model.winner, loser = model.loser}]
         }
-        , Cmd.none)
+        , saveGames [] Save)
+    Save _ -> (model, Cmd.none)
 
 viewGame game = li [] [text <| toString game]
 
@@ -54,7 +60,7 @@ view model =
     , input [onInput TypeLoser, value model.loser] [ ]
     , button [onClick Add] [text "Add"]
     --, viewGames model.games
-    , h2 [] [text "Bordshockeystege"]
+    , h2 [] [text "Stege"]
     , viewLadder <| createLadder model.games
     ]
 
