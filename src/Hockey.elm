@@ -4,7 +4,7 @@ import Html.Attributes exposing (disabled, value)
 
 import Ladder exposing (..)
 
-import Persistence exposing (saveGames)
+import Persistence exposing (loadGames, saveGames)
 import Http
 
 type alias Model =
@@ -13,12 +13,15 @@ type alias Model =
   , loser : String
   }
 
-init : Model
+init : (Model, Cmd Msg)
 init =
+  (
   { games = []
   , winner = ""
   , loser = ""
   }
+  , loadGames Load
+  )
 
 subscriptions : Model -> Sub Msg
 subscriptions model = Sub.none
@@ -27,6 +30,7 @@ type Msg =
       TypeWinner String
     | TypeLoser String
     | Add
+    | Load (Result Http.Error (List Game))
     | Save (Result Http.Error String)
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -36,13 +40,19 @@ update msg model =
         ({ model | winner = player}, Cmd.none)
     TypeLoser player ->
         ({ model | loser = player }, Cmd.none)
+    Load loadResult ->
+        case loadResult of
+        Result.Ok games -> ({ model | games = games}, Cmd.none)
+        Result.Err _ -> (model, Cmd.none)
     Add ->
+        let newGames = model.games ++ [{winner = model.winner, loser = model.loser}]
+        in
         ({ model
         | winner = ""
         , loser = ""
-        , games = model.games ++ [{winner = model.winner, loser = model.loser}]
+        , games = newGames
         }
-        , saveGames [] Save)
+        , saveGames newGames Save)
     Save _ -> (model, Cmd.none)
 
 viewGame game = li [] [text <| toString game]
@@ -67,4 +77,4 @@ view model =
 
 main : Program Never Model Msg
 main =
-  Html.program { init = (init, Cmd.none), view = view, update = update, subscriptions = subscriptions }
+  Html.program { init = init, view = view, update = update, subscriptions = subscriptions }
