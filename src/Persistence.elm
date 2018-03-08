@@ -11,11 +11,21 @@ url =
     "http://localhost:8001/hokeo/games"
 
 
+winner : String
+winner =
+    "winner"
+
+
+loser : String
+loser =
+    "loser"
+
+
 encodeGame : Game -> Json.Encode.Value
 encodeGame game =
     Json.Encode.object
-        [ ( "winner", Json.Encode.string game.winner )
-        , ( "loser", Json.Encode.string game.loser )
+        [ ( winner, Json.Encode.string game.winner )
+        , ( loser, Json.Encode.string game.loser )
         ]
 
 
@@ -32,8 +42,8 @@ gamesAsBody =
 decodeGame : Json.Decode.Decoder Game
 decodeGame =
     Json.Decode.map2 Game
-        (Json.Decode.field "winner" Json.Decode.string)
-        (Json.Decode.field "loser" Json.Decode.string)
+        (Json.Decode.field winner Json.Decode.string)
+        (Json.Decode.field loser Json.Decode.string)
 
 
 decodeGames : Json.Decode.Decoder (List Game)
