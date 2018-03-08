@@ -11,8 +11,11 @@ type alias Model =
   { games : List Game
   , winner : String
   , loser : String
-  , serverMessage : String
+  , serverError : Maybe String
   }
+
+setError : Http.Error -> Model -> Model
+setError error model = { model | serverError = (Just (toString error)) }
 
 init : (Model, Cmd Msg)
 init =
@@ -20,7 +23,7 @@ init =
   { games = []
   , winner = ""
   , loser = ""
-  , serverMessage = ""
+  , serverError = Nothing
   }
   , loadGames Load
   )
@@ -42,10 +45,8 @@ update msg model =
         ({ model | winner = player}, Cmd.none)
     TypeLoser player ->
         ({ model | loser = player }, Cmd.none)
-    Load loadResult ->
-        case loadResult of
-        Result.Ok games -> ({ model | games = games}, Cmd.none)
-        Result.Err _ -> (model, Cmd.none)
+    Load (Ok games) -> ({ model | games = games}, Cmd.none)
+    Load (Result.Err error) -> (setError error model, Cmd.none)
     Add ->
         let newGames = model.games ++ [{winner = model.winner, loser = model.loser}]
         in
@@ -55,8 +56,8 @@ update msg model =
         , games = newGames
         }
         , saveGames newGames Save)
-    Save (Ok message) -> ({ model | serverMessage = message }, Cmd.none)
-    Save (Result.Err message) -> ({ model | serverMessage = (toString message) }, Cmd.none)
+    Save (Ok _) -> ({ model | serverError = Nothing }, Cmd.none)
+    Save (Result.Err error) -> (setError error model, Cmd.none)
 
 viewGame game = li [] [text <| toString game]
 
@@ -65,6 +66,12 @@ viewGames = ul [] << List.map viewGame
 viewPlayer player = li [] [text player]
 viewLadder ladder = ul [] <| List.map viewPlayer ladder
 
+viewError : Maybe String -> Html Msg
+viewError message =
+  Maybe.withDefault "" message
+  |> Html.text
+
+view : Model -> Html Msg
 view model =
   div []
     [ div [] [ text "Winner" ]
@@ -75,7 +82,7 @@ view model =
     --, viewGames model.games
     , h2 [] [text "Stege"]
     , viewLadder <| createLadder model.games
-    , text model.serverMessage
+    , viewError model.serverError
     ]
 
 

@@ -6,6 +6,8 @@ import Http
 
 import Ladder exposing (Game)
 
+url = "http://localhost:8001/hokeo/games"
+
 encodeGame : Game -> Json.Encode.Value
 encodeGame game =
     Json.Encode.object
@@ -35,9 +37,9 @@ saveGames games callback =
     let body = gamesAsBody games
     in
     Http.send callback
-    <| Http.post "http://localhost:8001/hokeo/games" body Json.Decode.string
+    <| Http.post url body Json.Decode.string
 
 loadGames : (Result Http.Error (List Game) -> msg) -> Cmd msg
 loadGames callback =
     Http.send callback
-    <| Http.get "http://localhost:8000/games.json" decodeGames
+    <| Http.get url decodeGames
