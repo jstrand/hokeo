@@ -11,6 +11,7 @@ type alias Model =
   { games : List Game
   , winner : String
   , loser : String
+  , serverMessage : String
   }
 
 init : (Model, Cmd Msg)
@@ -19,6 +20,7 @@ init =
   { games = []
   , winner = ""
   , loser = ""
+  , serverMessage = ""
   }
   , loadGames Load
   )
@@ -53,7 +55,8 @@ update msg model =
         , games = newGames
         }
         , saveGames newGames Save)
-    Save _ -> (model, Cmd.none)
+    Save (Ok message) -> ({ model | serverMessage = message }, Cmd.none)
+    Save (Result.Err message) -> ({ model | serverMessage = (toString message) }, Cmd.none)
 
 viewGame game = li [] [text <| toString game]
 
@@ -72,6 +75,7 @@ view model =
     --, viewGames model.games
     , h2 [] [text "Stege"]
     , viewLadder <| createLadder model.games
+    , text model.serverMessage
     ]
 
 
